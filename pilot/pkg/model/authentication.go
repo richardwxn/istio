@@ -26,6 +26,7 @@ import (
 	"github.com/gogo/protobuf/types"
 
 	authn "istio.io/api/authentication/v1alpha1"
+	authn2 "istio.io/api/authentication/v1alpha2"
 )
 
 const (
@@ -73,10 +74,21 @@ func GetConsolidateAuthenticationPolicy(store IstioConfigStore, serviceInstance 
 	if config != nil {
 		policy := config.Spec.(*authn.Policy)
 		if err := JwtKeyResolver.SetAuthenticationPolicyJwksURIs(policy); err == nil {
+			// TODO: convert this policy to alpha2 PolicySpec
 			return policy
 		}
 	}
 
+	return nil
+}
+
+// GetConsolidateAuthenticationPolicyAlpha2 returns the alpha2 authn policy.
+func GetConsolidateAuthenticationPolicyAlpha2(store IstioConfigStore, serviceInstance *ServiceInstance) *authn2.PolicySpec {
+	config := store.AuthenticationPolicyAlpha2ForLabels(serviceInstance.Service.Attributes.Namespace, serviceInstance.Labels)
+	if config != nil {
+		policy := config.Spec.(*authn2.AuthenticationPolicy)
+		return policy.Spec;
+	}
 	return nil
 }
 

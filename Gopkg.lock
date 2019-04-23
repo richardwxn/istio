@@ -1628,11 +1628,12 @@
   version = "v2.2.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:f26e267647e01c727543b37bfa3481303dc78d1def53372dba0edee0f60e21d0"
+  branch = "authn_v2"
+  digest = "1:0ba0ff606222e000ef4aacc7ceaa57c07ffce338f50f1ddb4371b33d3374df7a"
   name = "istio.io/api"
   packages = [
     "authentication/v1alpha1",
+    "authentication/v1alpha2",
     "envoy/config/filter/http/authn/v2alpha1",
     "envoy/config/filter/http/jwt_auth/v2alpha1",
     "mcp/v1alpha1",
@@ -1645,7 +1646,8 @@
     "rbac/v1alpha1",
   ]
   pruneopts = "T"
-  revision = "6b8d1849e7f44ef523b4442af69b57ddc960d38b"
+  revision = "835ad91e9266fc7916da3ab67a4cf980bbf62545"
+  source = "https://github.com/diemtvu/api.git"
 
 [[projects]]
   branch = "release-1.11"
@@ -1761,18 +1763,21 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:710802a843bee12a00a168d119e0d6afea3ca723fb67cd6ee073a902e943f669"
+  digest = "1:492477ec25e2387e126ad714799fd5e374e3b88378326223d9b5752ff638e91c"
   name = "k8s.io/apiserver"
   packages = [
+    "pkg/authentication/authenticator",
+    "pkg/authentication/user",
     "pkg/features",
     "pkg/util/feature",
+    "plugin/pkg/authenticator/token/oidc",
   ]
   pruneopts = "NUT"
-  revision = "7ec69625ace05fbf94f1d12c51a69774cca2ecb3"
+  revision = "47f1dd8008166a8729c4ff1fbfdfc8d6fb0ae894"
 
 [[projects]]
   branch = "release-8.0"
-  digest = "1:4787de3b2e060e89a22cf9a12590c5aa8f882aec1400334998f22f5dff36f15b"
+  digest = "1:b669f12cb15d2f991be7ab0c9d928a47e99d2176e773a8b86072708d7522218b"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -1950,7 +1955,7 @@
     "util/workqueue",
   ]
   pruneopts = "NUT"
-  revision = "56e7a63b5e38b614bb7cb8c49ed26dc991b324c4"
+  revision = "4022682532b3b46b46a31b4c6150cbf55174cf0f"
 
 [[projects]]
   digest = "1:97703d78f59b1906eee5cc024d06f57053995123c3628bb8fdf16f1d090b5cae"
@@ -2197,8 +2202,10 @@
     "google.golang.org/grpc/stats",
     "google.golang.org/grpc/status",
     "gopkg.in/d4l3k/messagediff.v1",
+    "gopkg.in/square/go-jose.v2",
     "gopkg.in/yaml.v2",
     "istio.io/api/authentication/v1alpha1",
+    "istio.io/api/authentication/v1alpha2",
     "istio.io/api/envoy/config/filter/http/authn/v2alpha1",
     "istio.io/api/envoy/config/filter/http/jwt_auth/v2alpha1",
     "istio.io/api/mcp/v1alpha1",
@@ -2243,6 +2250,8 @@
     "k8s.io/apimachinery/pkg/util/yaml",
     "k8s.io/apimachinery/pkg/version",
     "k8s.io/apimachinery/pkg/watch",
+    "k8s.io/apiserver/pkg/authentication/user",
+    "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
     "k8s.io/client-go/dynamic",
