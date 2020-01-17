@@ -157,10 +157,12 @@ func genIOPS(inFilename []string, profile, setOverlayYAML, ver string,
 			return "", nil, err
 		}
 	}
+
 	overlayYAML, err = translate.OverlayYAMLTree(overlayYAML, overlayYAML, name.LegacyAddonComponentPathMap)
 	if err != nil {
 		return "", nil, fmt.Errorf("error translating addon components enablement from values of overlay files: %v", err)
 	}
+
 	// Merge base and overlay.
 	mergedYAML, err := util.OverlayYAML(baseYAML, overlayYAML)
 	if err != nil {
@@ -278,7 +280,7 @@ func unmarshalAndValidateIOP(crYAML string, force bool) (*v1alpha1.IstioOperator
 
 func unmarshalAndValidateIOPS(iopsYAML string, force bool, l *Logger) (*v1alpha1.IstioOperatorSpec, error) {
 	iops := &v1alpha1.IstioOperatorSpec{}
-	if err := util.UnmarshalWithJSONPB(iopsYAML, iops); err != nil {
+	if err := util.UnmarshalWithJSONPB(iopsYAML, iops, false); err != nil {
 		return nil, fmt.Errorf("could not unmarshal the merged YAML: %s\n\nYAML:\n%s", err, iopsYAML)
 	}
 	if errs := validate.CheckIstioOperatorSpec(iops, true); len(errs) != 0 {
