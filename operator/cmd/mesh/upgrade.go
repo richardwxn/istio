@@ -146,6 +146,7 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 		return fmt.Errorf("failed to read the current Istio version, error: %v", err)
 	}
 
+	// TODO: remove from PR, this is used for testing only
 	currentVersion = "1.3.0"
 	targetVersion = "1.4.3"
 	// Check if the upgrade currentVersion -> targetVersion is supported
@@ -183,7 +184,7 @@ func upgrade(rootArgs *rootArgs, args *upgradeArgs, l *Logger) (err error) {
 	}
 
 	// Run pre-upgrade hooks
-	hparams := &hooks.HookCommonParams{
+	hparams := &hooks.UpgradeHookCommonParams{
 		SourceVer:                currentVersion,
 		TargetVer:                targetVersion,
 		DefaultTelemetryManifest: nkMap,

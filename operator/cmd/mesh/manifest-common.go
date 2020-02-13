@@ -16,6 +16,7 @@ package mesh
 
 import (
 	"fmt"
+	"istio.io/istio/operator/pkg/hooks"
 	"path"
 	"path/filepath"
 	"strings"
@@ -77,6 +78,21 @@ func genApplyManifests(setOverlay []string, inFilename []string, force bool, dry
 		DeprecatedComponentManifest := fmt.Sprintf("# %s component has been deprecated.\n", cn)
 		manifests[cn] = append(manifests[cn], DeprecatedComponentManifest)
 	}
+
+	hparams := &hooks.HookCommonParams{
+		SourceVer:                currentVersion,
+		TargetVer:                targetVersion,
+		DefaultTelemetryManifest: nkMap,
+		SourceIOPS:               targetIOPS,
+		TargetIOPS:               targetIOPS,
+	}
+	errs := hooks.RunPreUpgradeHooks(kubeClient, hparams, rootArgs.dryRun)
+	if len(errs) != 0 && !args.force {
+		return fmt.Errorf("failed in pre-upgrade hooks, error: %v", errs.ToError())
+	}
+
+
+
 
 	out, err := manifest.ApplyAll(manifests, version.OperatorBinaryVersion, opts)
 	if err != nil {
