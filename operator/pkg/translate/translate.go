@@ -129,7 +129,8 @@ func NewTranslator(minorVersion version.MinorVersion) (*Translator, error) {
 }
 
 // OverlayK8sSettings overlays k8s settings from iop over the manifest objects, based on t's translation mappings.
-func (t *Translator) OverlayK8sSettings(yml string, iop *v1alpha1.IstioOperatorSpec, componentName name.ComponentName, index int) (string, error) {
+func (t *Translator) OverlayK8sSettings(yml string, iop *v1alpha1.IstioOperatorSpec, componentName name.ComponentName,
+	addonName string, index int) (string, error) {
 	objects, err := object.ParseK8sObjectsFromYAMLManifest(yml)
 	if err != nil {
 		return "", err
@@ -147,9 +148,27 @@ func (t *Translator) OverlayK8sSettings(yml string, iop *v1alpha1.IstioOperatorS
 		}
 		inPath = strings.Replace(inPath, "gressGateways.", "gressGateways."+fmt.Sprint(index)+".", 1)
 		scope.Debugf("Checking for path %s in IstioOperatorSpec", inPath)
-		m, found, err := tpath.GetFromStructPath(iop, inPath)
-		if err != nil {
-			return "", err
+
+		var found bool
+		var m interface{}
+		if componentName == name.AddonComponentName {
+			inPath = strings.Replace(inPath, "Components.AddonComponents.", "", 1)
+			scope.Debugf("Checking for path %s in K8S Spec of AddonComponents: %s", inPath, addonName)
+			addonMaps := iop.AddonComponents
+			if extSpec, ok := addonMaps[addonName]; ok {
+				m, found, err = tpath.GetFromStructPath(extSpec, inPath)
+				if err != nil {
+					return "", err
+				}
+			} else {
+				scope.Debugf("path %s not found in AddonComponents.%s, skip mapping.", inPath, addonName)
+				continue
+			}
+		} else {
+			m, found, err = tpath.GetFromStructPath(iop, inPath)
+			if err != nil {
+				return "", err
+			}
 		}
 		if !found {
 			scope.Debugf("path %s not found in IstioOperatorSpec, skip mapping.", inPath)
@@ -165,7 +184,7 @@ func (t *Translator) OverlayK8sSettings(yml string, iop *v1alpha1.IstioOperatorS
 			scope.Debugf("path %s is int 0, skip mapping.", inPath)
 			continue
 		}
-		outPath, err := t.renderResourceComponentPathTemplate(v.OutPath, componentName)
+		outPath, err := t.renderResourceComponentPathTemplate(v.OutPath, componentName, addonName)
 		if err != nil {
 			return "", err
 		}
@@ -541,15 +560,23 @@ func renderFeatureComponentPathTemplate(tmpl string, componentName name.Componen
 
 // renderResourceComponentPathTemplate renders a template of the form <path>{{.ResourceName}}<path>{{.ContainerName}}<path> with
 // the supplied parameters.
-func (t *Translator) renderResourceComponentPathTemplate(tmpl string, componentName name.ComponentName) (string, error) {
+func (t *Translator) renderResourceComponentPathTemplate(tmpl string, componentName name.ComponentName, addonName string) (string, error) {
+	cn := string(componentName)
+	if componentName == name.AddonComponentName {
+		cn = addonName
+	}
+	cmp := t.ComponentMap(cn)
+	if cmp == nil {
+		return "", fmt.Errorf("addonComponent: %s does not exist in the componentMap", addonName)
+	}
 	ts := struct {
 		ResourceType  string
 		ResourceName  string
 		ContainerName string
 	}{
-		ResourceType:  t.ComponentMaps[componentName].ResourceType,
-		ResourceName:  t.ComponentMaps[componentName].ResourceName,
-		ContainerName: t.ComponentMaps[componentName].ContainerName,
+		ResourceType:  cmp.ResourceType,
+		ResourceName:  cmp.ResourceName,
+		ContainerName: cmp.ContainerName,
 	}
 	return util.RenderTemplate(tmpl, ts)
 }
