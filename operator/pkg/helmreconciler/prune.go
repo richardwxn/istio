@@ -301,6 +301,7 @@ func (h *HelmReconciler) deleteResources(excluded map[string]bool, coreLabels ma
 				// do not return error if resources are not found
 				h.opts.Log.LogAndPrintf("object: %s is not being deleted because it no longer exist", obj.Hash())
 			}
+			continue
 		}
 		if !all {
 			h.removeFromObjectCache(componentName, oh)

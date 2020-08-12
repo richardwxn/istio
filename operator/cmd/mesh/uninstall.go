@@ -190,7 +190,7 @@ func preCheckWarnings(cmd *cobra.Command, uiArgs *uninstallArgs,
 			message += fmt.Sprintf("The following resources will be pruned from the cluster: %s\n",
 				rmListString)
 		}
-		if len(pids) != 0 {
+		if len(pids) != 0 && rev != "" {
 			needConfirmation = true
 			message += fmt.Sprintf("There are still %d proxies pointing to the control plane revision %s:\n", len(pids), uiArgs.revision)
 			// just print the count only if there is a large list of proxies
